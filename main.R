@@ -1,97 +1,193 @@
-library("tidyverse")
-
-# ------------------------------------------------------ #
-# IMPORT THE DATA
-# ------------------------------------------------------ #
-airbnb_df <- read.csv("airbnb-listings.csv", sep = ";")
-
-
-# ------------------------------------------------------ #
-# TIDY THE DATA
-# ------------------------------------------------------ #
-
-# Check out the variables and their data types
-# Observations:
-# 1. Most of the values are strings with no particular patterns or structure, not useful for analysis.
-# 2. Some variables which look useful for our data analysis:
-# "Accommodates", "Bedrooms", "Bathrooms", "Beds", "Price", "City", "State", etc
-glimpse(airbnb_df)
-
-# Create a vector of the useful variables
-useful_vars <- c(
-  "City",
-  "State",
-  "Country",
-  "Accommodates",
-  "Bathrooms",
-  "Bedrooms",
-  "Beds",
-  "Price",
-  "Number.of.Reviews",
-  "Review.Scores.Rating",
-  "Property.Type"
+# ------------------------------------------------------------- #
+# -------------------- LOAD THE LIBRARIES --------------------- #
+# ------------------------------------------------------------- #
+list_of_packages <- c(
+    "tidyverse",
+    "vroom",
+    "caret",
+    "ggcorrplot",
+    "ranger",
+    "class"
 )
 
-# Remove all the other variables from the data frame.
-airbnb_df <- airbnb_df[, useful_vars]
+missing_packages <- list_of_packages[!(list_of_packages %in% installed.packages()[, "Package"])]
 
-# Remove all the rows with at least column equal to NA.
-airbnb_df <- na.omit(airbnb_df)
-# Remove all the rows with empty strings for City, State or Country
-airbnb_df <- airbnb_df[airbnb_df$City != "", ]
-airbnb_df <- airbnb_df[airbnb_df$State != "", ]
-airbnb_df <- airbnb_df[airbnb_df$Country != "", ]
-airbnb_df <- airbnb_df[airbnb_df$Property.Type != "", ]
+if (length(missing_packages)) {
+    install.packages(missing_packages)
+}
 
-# Check the data again.
-glimpse(airbnb_df)
-summary(airbnb_df)
+for (package in list_of_packages) {
+    lapply(package, require, character.only = TRUE)
+}
 
-# There is still an anomaly with the price, as it has a minimum value of 0.
-# Each listing on Airbnb needs to have a non-zero price, so we'll remove these rows of data.
-# Remove rows with price = 0
-airbnb_df <- airbnb_df[airbnb_df$Price > 0, ]
+# Load the file
+if (file.exists("airbnb.csv")) {
+    file <- "airbnb.csv"
+} else {
+    file <- "https://ind657-my.sharepoint.com/:x:/g/personal/dasss01_pfw_edu/ERrwzwXvN2dAqPkh8o-LFvYBwA6_XipX_5nmGBWeIBDhiA?download=1"
+}
 
 
-# ------------------------------------------------------ #
-# INITIAL EXPLORATORY AND DESCRIPTIVE ANALYSIS FOR USA
-# ------------------------------------------------------ #
+airbnb <- vroom(file = file, delim = ";", skip_empty_rows = TRUE, na = c("", "NA"))
 
-# In order to understand the relationship between a rental's price and its 89 variables in the dataset, a descriptive analysis was carried out and the variables were classified into three main categories:   
+View(airbnb)
 
-# 1. Property Information: including location, type etc.   
+glimpse(airbnb)
 
-# 2. Previous Reviews: including number of reviews, review scores etc.   
+na_prop <- colMeans(is.na(airbnb)) * 100
 
-# 3. Redundant Data: including listing url, name, notes, weekly price etc.  
+airbnb <- airbnb %>% select(names(na_prop[na_prop < 30]))
 
-# The influential variables mainly consist of two parts: property information, and previous reviews. Subsequently, 11 representative variables were selected from those three categories of data to examine their correlation.
+useful_vars <- c(
+    "City",
+    "Country Code",
+    "Country",
+    "Property Type",
+    "Room Type",
+    "Accommodates",
+    "Bathrooms",
+    "Bedrooms",
+    "Beds",
+    "Price",
+    "Number of Reviews",
+    "Review Scores Accuracy",
+    "Review Scores Cleanliness",
+    "Review Scores Location",
+    "Review Scores Communication",
+    "Review Scores Rating",
+    "Review Scores Value",
+    "Latitude",
+    "Longitude"
+)
 
-usa_listings = airbnb_df[airbnb_df$Country == "United States", ]
+airbnb <- airbnb %>% select(all_of(useful_vars))
 
-# Histogram of the price.
-ggplot(data = usa_listings) + geom_histogram(mapping = aes(x = usa_listings$Price), bins = 50, col = "#000000", fill = "#CCFFCC") + labs(x = "Price (per night)", y = "Count") + scale_x_continuous(breaks = c(seq(0, max(usa_listings$Price), 100)))
-# Most of the properties are priced around 50$ to 150$ range and the frequency is tapering as the price increases.
+airbnb <- na.omit(airbnb)
 
-# Box plot of price for each property type.
-ggplot(data = usa_listings) + geom_boxplot(mapping = aes(x = usa_listings$Price, y = usa_listings$Property.Type)) + labs(x = "Price (per night)", y = "Property Type")
 
-# Scatter plot of price vs No. of Bedrooms
-ggplot(data = usa_listings) + geom_point(mapping = aes(x = usa_listings$Price, y = usa_listings$Bedrooms, color = usa_listings$Property.Type)) + labs(x = "Price (per night)", y = "No. of Bedrooms") + scale_y_continuous(breaks = c(0, max(usa_listings$Bedrooms), 1))
 
-# Scatter plot of price vs No. of Bathrooms
-ggplot(data = usa_listings) + geom_point(mapping = aes(x = usa_listings$Price, y = usa_listings$Bathrooms, color = usa_listings$Property.Type)) + labs(x = "Price (per night)", y = "No. of Bathrooms") + scale_y_continuous(breaks = c(0, max(usa_listings$Bathrooms), 1))
+# Exploratory Data Analysis
 
-# Scatter plot of price vs No. of Beds
-ggplot(data = usa_listings) + geom_point(mapping = aes(x = usa_listings$Price, y = usa_listings$Beds, color = usa_listings$Property.Type)) + labs(x = "Price (per night)", y = "No. of Beds") + scale_y_continuous(breaks = c(0, max(airbnb_df$Beds), 1))
+# Country wise distribution of listings
+country_wise_distribution <- airbnb %>% group_by(Country) %>% count(sort = T)
+country_wise_distribution %>%
+ggplot(aes(reorder(Country, n), n)) + geom_col() + coord_flip() + labs(x = "Country", y = "Number of Listings")
 
-# Scatter plot of price vs Ratings
-ggplot(data = usa_listings) + geom_point(mapping = aes(x = usa_listings$Price, y = usa_listings$Review.Scores.Rating)) + labs(x = "Price (per night)", y = "Ratings (0 - 100)")
+# Property wise distribution of listings
+property_wise_distribution <- airbnb %>% group_by(`Property Type`) %>% count(sort = T)
+property_wise_distribution %>%
+ggplot(aes(reorder(`Property Type`, n), n)) + geom_col() + coord_flip() + labs(x = "Property Type", y = "Number of Listings") + scale_y_log10()
 
-# Scatter plot of ratings vs No. of ratings
-ggplot(data = usa_listings) + geom_point(mapping = aes(x = usa_listings$Review.Scores.Rating, y = usa_listings$Number.of.Reviews)) + labs(y = "No. of Reviews", x = "Ratings (0 - 100)")
+# Room wise distribution of listings
+room_wise_distribution <- airbnb %>% group_by(`Room Type`) %>% count(sort = T)
+room_wise_distribution %>%
+ggplot(aes(reorder(`Room Type`, -n), n)) + geom_col() + labs(x = "Room Type", y = "Number of Listings")
 
-# The pattern in the change in the no. of bedrooms, bathrooms, beds do not significantly influence the prices.
-# Whereas the property type and location highly influence the prices.
-#
-                                  
+# Modify the data to exclude countries with less than 10,000 listings and property types with less than 100 listings
+airbnb <- airbnb %>% filter(!(Country %in% (country_wise_distribution %>% filter(n < 10000))$Country))
+airbnb <- airbnb %>% filter(!(`Property Type` %in% (property_wise_distribution %>% filter(n < 100))$`Property Type`))
+airbnb <- airbnb %>% filter(Price > 0)
+
+# City wise distribution of listings in the top 3 countries -> USA, UK and France
+usa_city_wise_distribution <- airbnb %>% filter(Country == "United States") %>% group_by(City) %>% count(sort = T)
+uk_city_wise_distribution <- airbnb %>% filter(Country == "United Kingdom") %>% group_by(City) %>% count(sort = T)
+france_city_wise_distribution <- airbnb %>% filter(Country == "France") %>% group_by(City) %>% count(sort = T)
+
+
+# Overall price distribution, positively skewed
+ggplot(airbnb, aes(x = Price)) + geom_histogram(binwidth = 30)
+
+# Distribution of price according to countries
+ggplot(airbnb, aes(x = Country, y = Price)) + geom_boxplot() + coord_flip()
+
+# Distribution of price according to property types
+ggplot(airbnb, aes(x = `Property Type`, y = Price)) + geom_boxplot() + coord_flip()
+
+# Median price per country
+airbnb %>% group_by(Country) %>% summarize(Median = median(Price)) %>%
+    ggplot(aes(reorder(Country, Median), Median)) + geom_col(width = 0.6) + coord_flip()
+
+# Median price per property type
+airbnb %>% group_by(`Property Type`) %>% summarize(Median = median(Price)) %>% mutate(position = (Median > 100)) %>%
+    ggplot(aes(reorder(`Property Type`, Median), Median, fill = position)) + geom_col(width = 0.3) + coord_flip() +
+    scale_fill_manual(values = c("blue", "firebrick"))
+
+# Median price per room type
+airbnb %>% group_by(`Room Type`) %>% summarize(Median = median(Price)) %>%
+    ggplot(aes(reorder(`Room Type`, -Median), Median)) + geom_col(width = 0.4)
+
+airbnb_num <- airbnb %>% select(-c("City", "Country Code", "Country", "Property Type", "Room Type"))
+airbnb_cor <- cor(airbnb_num)
+ggcorrplot(airbnb_cor) + labs(title = "Airbnb Correlogram") + theme(plot.title = element_text(hjust = 0.5))
+
+# MODELS
+
+# -------------------------------------------------------- #
+# --------------------- RANDOM FOREST -------------------- #
+# -------------------------------------------------------- #
+
+# Filter out US Data
+airbnb_usa <- airbnb %>% filter(Country == "United States")
+airbnb_usa <- airbnb_usa %>% rename(Review_Scores_Rating = `Review Scores Rating`,
+                                    Property_Type = `Property Type`,
+                                    Room_Type = `Room Type`)
+
+set.seed(100)
+test_index <- createDataPartition(y = airbnb_usa$Price, times = 1, p = 0.4, list = F)
+airbnb_usa_training <- airbnb_usa[-test_index, ]
+airbnb_usa_test <- airbnb_usa[test_index, ]
+
+
+set.seed(100)
+
+rf_formula <- Price ~ Accommodates + Bathrooms + Bedrooms + Beds + Review_Scores_Rating + Latitude + Longitude + City + Property_Type + Room_Type
+
+rf_model <- ranger(rf_formula, airbnb_usa_training, num.trees = 500, mtry = 7)
+rf_model
+
+airbnb_usa_training$pred <- predict(rf_model, airbnb_usa_training)$predictions
+airbnb_usa_test$pred <- predict(rf_model, airbnb_usa_test)$predictions
+
+airbnb_usa_training %>%
+    mutate(residual = pred - Price) %>%
+    summarize(rmse = sqrt(mean(residual ^ 2)))
+
+airbnb_usa_test %>%
+    mutate(residual = pred - Price) %>%
+    summarize(rmse = sqrt(mean(residual ^ 2)))
+
+
+# -------------------------------------------------------- #
+# ---------------------- KNN MODEL ----------------------- #
+# -------------------------------------------------------- #
+
+airbnb_knn <- airbnb %>%
+    rename(Number_of_Reviews = `Number of Reviews`,
+           Review_Scores_Accuracy = `Review Scores Accuracy`,
+           Review_Scores_Cleanliness = `Review Scores Cleanliness`,
+           Review_Scores_Location = `Review Scores Location`,
+           Review_Scores_Communication = `Review Scores Communication`,
+           Review_Scores_Rating = `Review Scores Rating`,
+           Room_Type = `Room Type`,
+           Review_Scores_Value = `Review Scores Value`,
+           Property_Type = `Property Type`) %>%
+    filter(Country == "United States") %>%
+    select(-c("City", "Country Code", "Country", "Property_Type", "Room_Type", "Longitude", "Latitude"))
+
+
+set.seed(100)
+normalization <- function(x) { (x - min(x)) / (max(x) - min(x)) }
+
+airbnb_knn_norm <- as.data.frame(lapply(airbnb_knn, normalization))
+
+set.seed(100)
+test_index <- createDataPartition(y = airbnb_knn$Review_Scores_Rating, times = 1, p = 0.3, list = F)
+
+airbnb_knn_training <- airbnb_knn_norm[-test_index, ]
+airbnb_knn_test <- airbnb_knn_norm[test_index, ]
+
+knn_model <- knn(train = airbnb_knn_training, test = airbnb_knn_test, cl = airbnb_knn_training$Review_Scores_Rating, k = 5)
+
+accuracy_knn <- 100 * sum(airbnb_knn_test$Review_Scores_Rating == knn_model)/NROW(airbnb_knn_test$Review_Scores_Rating)
+accuracy_knn
+
