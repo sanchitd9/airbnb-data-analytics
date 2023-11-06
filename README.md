@@ -1,5 +1,13 @@
 # Airbnb Price Prediction
 
+A machine learning project focused on predicting Airbnb listing prices.
+
+- [Introduction](#introduction)
+- [Cleaning and Tidying the Dataset](#cleaning-and-tidying-the-dataset)
+- [Descriptive Analytics and Visualizations](#descriptive-analytics-and-visualizations)
+- [Predictive Analytics](#predictive-analytics)
+- [Conclusion](#conclusion)
+
 ## Introduction
 
 This project aims at analyzing a dataset containing Airbnb listings across several countries. Airbnb is an online marketplace for short-term rentals and holiday experiences. This platform has gained much popularity due to its affordability and flexibility compared to a traditional hotel experience. Airbnb listings span a wide range of locations which hotels cannot match as they are usually clustered around tourist and business hot-spots. With increased popularity comes increased demand and a wide range of consumer listings. According to a 2019 estimate, there are over 6 million listings on Airbnb. By analyzing a subset of this data, which contains listings across 22 countries, we try to ascertain patterns in this data and answer specific questions arising from it.
