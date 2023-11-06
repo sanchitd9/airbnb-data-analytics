@@ -64,48 +64,48 @@ The cleaning and tidying process reduced the dataset from a table of 494,954 obs
 Descriptive analytics focus on summarizing and identifying patterns in current and historical data. Visualization is the graphic representation of the underlying patterns, which is more efficient when the data is numerous, as in the case here.
 
 1. Number of Listings per Country
-![image](https://user-images.githubusercontent.com/38399292/222561408-17d514ab-bce5-476f-8ede-d38ad85c7966.png)
+<img width="720" src="https://user-images.githubusercontent.com/38399292/222561408-17d514ab-bce5-476f-8ede-d38ad85c7966.png" alt="Number of Listings per Country">
 The plot reveals that the United States of America has the most listings, followed by United Kingdom and France. Also, USA has more than double the listings of 2nd placed UK. The lack of countries from the eastern side of the world clearly implies that the adoption of Airbnb has been very slow and in some cases non-existent.
 
 2. Number of Listings per “Property Type”
-![image](https://user-images.githubusercontent.com/38399292/222561592-18e6725f-9f3f-45cc-9abd-05250937b3dd.png)
+<img src="https://user-images.githubusercontent.com/38399292/222561592-18e6725f-9f3f-45cc-9abd-05250937b3dd.png" alt="Number of Listings per Property Type" width="720">
 Apartments and houses are the most common types of listings on Airbnb.
 
 3. Number of Listings per “Room Type”
-![image](https://user-images.githubusercontent.com/38399292/222561652-64eddefa-0413-4fda-b9ab-0b43ef839c67.png)
+<img src="https://user-images.githubusercontent.com/38399292/222561652-64eddefa-0413-4fda-b9ab-0b43ef839c67.png" alt="Number of Listings per Room Type" width="720">
 There are three room types — Entire home/apt, Private Room and Shared Room. Apartments are by far the most popular listings, with the number of shared rooms being insignificant compared to the other categories.
 
 4. City-wise Distribution of the top 3 Countries
-![image](https://user-images.githubusercontent.com/38399292/222561726-0b1a75c3-91e3-4334-a5d5-783b960218f5.png)
+<img src="https://user-images.githubusercontent.com/38399292/222561726-0b1a75c3-91e3-4334-a5d5-783b960218f5.png" alt="City-wise Distribution of the top 3 Countries" width="720">
 
 5. Histogram of Listing Price
-![image](https://user-images.githubusercontent.com/38399292/222561837-15af282a-7fa9-416c-b60c-632b30ce7ace.png)
+<img src="https://user-images.githubusercontent.com/38399292/222561837-15af282a-7fa9-416c-b60c-632b30ce7ace.png" alt="Histogram of Listing Price" width="720">
 The distribution is positively skewed with the majority of values lying in the $0 to $250 range. Since the data is skewed, the median is a good measure of the center.
 
 6. Frequency Polygon of Listing Price
-![image](https://user-images.githubusercontent.com/38399292/222562012-d2d4283c-764a-49d4-b761-b88bdfbbd51e.png)
+<img src="https://user-images.githubusercontent.com/38399292/222562012-d2d4283c-764a-49d4-b761-b88bdfbbd51e.png" alt="Frequency Polygon of Listing Price" width="720">
 The relative distribution of the listing prices is similar for all the countries.
 
 7. Distribution of Listing Price grouped by Country
-![image](https://user-images.githubusercontent.com/38399292/222562130-044b7613-4f95-4021-b258-1e366caf58b4.png)
+<img src="https://user-images.githubusercontent.com/38399292/222562130-044b76dd-b9ab-05250937b3dd.png" alt="Distribution of Listing Price grouped by Country" width="720">
 Denmark has a higher median price compared to other countries, and there are a lot of outliers. These outliers mostly consist of luxury listings.
 
 8. Distribution of Listing Price grouped by Property Type
-![image](https://user-images.githubusercontent.com/38399292/222562264-765c7023-8750-4699-b0f2-e1a919ffd89d.png)
+<img src="https://user-images.githubusercontent.com/38399292/222562264-765c7023-8750-4699-b0f2-e1a919ffd89d.png" alt="Distribution of Listing Price grouped by Property Type" width="720">
 Luxury listings like boats, chalets, condos, and villas have a higher median price.
 
 9. Distribution of Listing Price grouped by Room Type
-![image](https://user-images.githubusercontent.com/38399292/222562386-9db6aa06-f8ee-4b9c-a10b-3bcad2ee240c.png)
+<img src="https://user-images.githubusercontent.com/38399292/222562386-9db6aa06-f8ee-4b9c-a10b-3bcad2ee240c.png" alt="Distribution of Listing Price grouped by Room Type" width="720">
 As expected, shared rooms are the cheapest and apartments/homes are the most expensive listings.
 
 10. Median Listing Price per Country
-![image](https://user-images.githubusercontent.com/38399292/222562461-6fe7dc86-56a3-4512-9db7-7d2a21fd77fc.png)
+<img src="https://user-images.githubusercontent.com/38399292/222562461-6fe7dc86-56a3-4512-9db7-7d2a21fd77fc.png" alt="Median Listing Price per Country" width="720">
 
 11. Median Listing Price per Property Type
-![image](https://user-images.githubusercontent.com/38399292/222562525-fbc0fdeb-5609-466e-89e8-c55a9fffb80a.png)
+<img src="https://user-images.githubusercontent.com/38399292/222562525-fbc0fdeb-5609-466e-89e8-c55a9fffb80a.png" alt="Median Listing Price per Property Type" width="720">
 
 12. Median Listing Price per Room Type
-![image](https://user-images.githubusercontent.com/38399292/222562574-962514d9-6d76-4730-864b-7dc744a8260f.png)
+<img src="https://user-images.githubusercontent.com/38399292/222562574-962514d9-6d76-4730-864b-7dc744a8260f.png" alt="Median Listing Price per Room Type" width="720">
 
 ## Predictive Analytics
 We tried to answer the following research questions related to our data:
@@ -138,7 +138,7 @@ As long as they don’t consistently make mistakes in the same direction, the tr
 For models created utilizing those attributes to perform better than guesswork, there must be some actual signal in those features. Low correlations between the separate trees’ predictions (and thus the mistakes) are required.
 
 To determine the best features for this model, a correlation graph was plotted:
-![image](https://user-images.githubusercontent.com/38399292/222562915-20b5906a-c62a-4399-a6a1-37d386adfdd6.png)
+<img src="https://user-images.githubusercontent.com/38399292/222562915-20b5906a-c62a-4399-a6a1-37d386adfdd6.png" alt="Correlation Heatmap" width="720">
 
 This graph confirms the correlation between a specific set of features. For example, price is clearly correlated to the number of guests, bedrooms, bathrooms, beds, etc. Using these relationships the model was constructed using the ranger package in R. It provides a fast implementation of random forests. The data was randomly sampled into 2 subsets — one for training the model and one for testing it. The split was in the ratio of 60:40.
 
